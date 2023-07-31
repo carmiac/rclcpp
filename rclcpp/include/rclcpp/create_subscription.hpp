@@ -67,6 +67,10 @@ create_subscription(
   )
 )
 {
+  RCLCPP_INFO(
+    get_logger("rclcpp"), "create_subscription called with SubscriptionT type: %s",
+    abi::__cxa_demangle(typeid(SubscriptionT).name(), NULL, NULL, NULL));
+
   using rclcpp::node_interfaces::get_node_topics_interface;
   auto node_topics_interface = get_node_topics_interface(node_topics);
 
@@ -119,7 +123,7 @@ create_subscription(
     subscription_topic_stats->set_publisher_timer(timer);
   }
 
-  auto factory = rclcpp::create_subscription_factory<MessageT>(
+  auto factory = rclcpp::create_subscription_factory<MessageT, CallbackT, AllocatorT, SubscriptionT>(
     std::forward<CallbackT>(callback),
     options,
     msg_mem_strat,
@@ -134,6 +138,9 @@ create_subscription(
     qos;
 
   auto sub = node_topics_interface->create_subscription(topic_name, factory, actual_qos);
+  RCLCPP_INFO(get_logger("rclcpp"), "node_topics_interface->create_subscription returned type: %s",
+    abi::__cxa_demangle(typeid(sub).name(), NULL, NULL, NULL));
+
   node_topics_interface->add_subscription(sub, options.callback_group);
 
   return std::dynamic_pointer_cast<SubscriptionT>(sub);

@@ -87,6 +87,9 @@ create_subscription_factory(
   subscription_topic_stats = nullptr
 )
 {
+
+  RCLCPP_INFO(get_logger("rclcpp"), "create_subscription_factory called with SubscriptionT = %s",
+    abi::__cxa_demangle(typeid(SubscriptionT).name(), NULL, NULL, NULL));
   auto allocator = options.get_allocator();
 
   using rclcpp::AnySubscriptionCallback;
