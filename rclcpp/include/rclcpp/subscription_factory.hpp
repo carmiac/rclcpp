@@ -87,9 +87,6 @@ create_subscription_factory(
   subscription_topic_stats = nullptr
 )
 {
-
-  RCLCPP_INFO(get_logger("rclcpp"), "create_subscription_factory called with SubscriptionT = %s",
-    abi::__cxa_demangle(typeid(SubscriptionT).name(), NULL, NULL, NULL));
   auto allocator = options.get_allocator();
 
   using rclcpp::AnySubscriptionCallback;
@@ -102,12 +99,9 @@ create_subscription_factory(
       rclcpp::node_interfaces::NodeBaseInterface * node_base,
       const std::string & topic_name,
       const rclcpp::QoS & qos
-    ) -> rclcpp::SubscriptionBase::SharedPtr
+    ) -> std::shared_ptr<SubscriptionT>
     {
-      using rclcpp::Subscription;
-      using rclcpp::SubscriptionBase;
-
-      auto sub = Subscription<MessageT, AllocatorT>::make_shared(
+      auto sub = std::make_shared<SubscriptionT>(
         node_base,
         rclcpp::get_message_type_support_handle<MessageT>(),
         topic_name,
@@ -120,8 +114,7 @@ create_subscription_factory(
       // require this->shared_from_this() which cannot be called from
       // the constructor.
       sub->post_init_setup(node_base, qos, options);
-      auto sub_base_ptr = std::dynamic_pointer_cast<SubscriptionBase>(sub);
-      return sub_base_ptr;
+      return sub;
     }
   };
 

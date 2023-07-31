@@ -39,46 +39,44 @@ template<
     AllocatorT
   >>
 class LifecycleSubscription : public SimpleManagedEntity,
-                              public rclcpp::Subscription<MessageT, AllocatorT>
+  public rclcpp::Subscription<MessageT, AllocatorT>
 {
 
-  private:
-    using SubscriptionTopicStatisticsSharedPtr =
+private:
+  using SubscriptionTopicStatisticsSharedPtr =
     std::shared_ptr<rclcpp::topic_statistics::SubscriptionTopicStatistics<ROSMessageT>>;
 
-  public:
-    LifecycleSubscription(
-      rclcpp::node_interfaces::NodeBaseInterface * node_base,
-      const rosidl_message_type_support_t & type_support_handle,
-      const std::string & topic_name,
-      const rclcpp::QoS & qos,
-      rclcpp::AnySubscriptionCallback<MessageT, AllocatorT> callback,
-      const rclcpp::SubscriptionOptionsWithAllocator<AllocatorT> & options,
-      typename MessageMemoryStrategyT::SharedPtr message_memory_strategy,
-      SubscriptionTopicStatisticsSharedPtr subscription_topic_statistics = nullptr)
-    :  rclcpp::Subscription<MessageT>(
-        node_base, 
-        type_support_handle, 
-        topic_name, 
-        qos, 
-        callback,
-        options, 
-        message_memory_strategy, 
-        subscription_topic_statistics)
-    {
-    }
+public:
+  LifecycleSubscription(
+    rclcpp::node_interfaces::NodeBaseInterface * node_base,
+    const rosidl_message_type_support_t & type_support_handle,
+    const std::string & topic_name,
+    const rclcpp::QoS & qos,
+    rclcpp::AnySubscriptionCallback<MessageT, AllocatorT> callback,
+    const rclcpp::SubscriptionOptionsWithAllocator<AllocatorT> & options,
+    typename MessageMemoryStrategyT::SharedPtr message_memory_strategy,
+    SubscriptionTopicStatisticsSharedPtr subscription_topic_statistics = nullptr)
+  :  rclcpp::Subscription<MessageT>(
+      node_base,
+      type_support_handle,
+      topic_name,
+      qos,
+      callback,
+      options,
+      message_memory_strategy,
+      subscription_topic_statistics)
+  {
+  }
 
-    /// Check if we need to handle the message, and execute the callback if we do.
-    virtual void handle_message(
-      std::shared_ptr<void> & message, const rmw_message_info_t & message_info)
-    {
-      RCLCPP_INFO(rclcpp::get_logger("rclcpp_lifecycle"), "LifecycleSubscription::handle_message");
-      if (!this->is_activated()) {
-        RCLCPP_INFO(rclcpp::get_logger("rclcpp_lifecycle"), "LifecycleSubscription::handle_message: not activated");
-        return;
-      }
-      rclcpp::Subscription<MessageT>::handle_message(message, message_info);
+  /// Check if we need to handle the message, and execute the callback if we do.
+  virtual void handle_message(
+    std::shared_ptr<void> & message, const rclcpp::MessageInfo & message_info) override
+  {
+    if (!this->is_activated()) {
+      return;
     }
+    rclcpp::Subscription<MessageT>::handle_message(message, message_info);
+  }
 };
 
 }  // namespace rclcpp_lifecycle

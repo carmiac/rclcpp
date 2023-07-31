@@ -80,11 +80,6 @@ LifecycleNode::create_subscription(
   const rclcpp::SubscriptionOptionsWithAllocator<AllocatorT> & options,
   typename MessageMemoryStrategyT::SharedPtr msg_mem_strat)
 {
-  RCLCPP_INFO(
-    this->get_logger(),
-    "Creating lifecycle subscription with topic '%s'",
-    topic_name.c_str());
-    
   auto sub = rclcpp::create_subscription<MessageT, CallbackT, AllocatorT, SubscriptionT>(
     *this,
     topic_name,
